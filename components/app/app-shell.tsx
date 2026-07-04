@@ -1,6 +1,6 @@
 "use client";
 
-import { Show, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs";
+import { Show, UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import {
   createContext,
@@ -37,17 +37,17 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <RatingContext.Provider value={{ userRating, setUserRating }}>
       <div className="sticky top-0 z-50 border-b border-[#232B27] bg-[#121614]">
-        <div className="mx-auto flex h-10 w-full max-w-6xl items-center justify-between px-4 text-[11px] uppercase tracking-[0.24em] sm:px-6">
+        <div className="mx-auto flex min-h-10 w-full max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-2 text-[10px] uppercase tracking-[0.22em] sm:h-10 sm:flex-nowrap sm:gap-y-0 sm:px-6 sm:py-0 sm:text-[11px] sm:tracking-[0.24em]">
           <Link
             href="/"
             className="font-mono text-[#E0E6E3] transition-colors hover:text-[#3CD070]"
           >
             [KYNETA]
           </Link>
-          <div className="flex items-center gap-3 font-mono text-[#7A8A82]">
+          <div className="flex flex-1 flex-wrap items-center justify-end gap-2 font-mono text-[#7A8A82] sm:flex-nowrap sm:gap-3">
             <Link
               href="/leaderboard"
-              className="hidden border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070] sm:inline"
+              className="border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070]"
             >
               LEADERBOARD
             </Link>
@@ -77,9 +77,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               <div className="flex items-center gap-2">
                 <Link
                   href="/profile"
-                  className="hidden border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070] sm:inline"
+                  className="border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070]"
                 >
-                  MANAGE ACCOUNT
+                  <span className="sm:hidden">PROFILE</span>
+                  <span className="hidden sm:inline">MANAGE ACCOUNT</span>
                 </Link>
                 <UserButton
                   userProfileMode="navigation"
