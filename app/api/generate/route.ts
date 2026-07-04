@@ -3,9 +3,11 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-const TEXT_MODEL = "gemini-1.5-pro";
+const TEXT_MODEL = "gemini-2.5-pro";
 const IMAGE_MODEL = "imagen-3.0-generate-001";
 const STEP_TIMEOUT_MS = 45_000;
+const VERTEX_PROJECT = "kyneta";
+const VERTEX_LOCATION = "us-central1";
 
 type PuzzleGeneration = {
   problem_text: string;
@@ -39,15 +41,11 @@ const puzzleSchema = {
 } as const;
 
 function getGenAIClient() {
-  const apiKey = process.env.GEMINI_API_KEY ?? process.env.GOOGLE_API_KEY;
-
-  if (!apiKey) {
-    throw new Error(
-      "Missing Google AI API key. Set GEMINI_API_KEY or GOOGLE_API_KEY.",
-    );
-  }
-
-  return new GoogleGenAI({ apiKey });
+  return new GoogleGenAI({
+    vertexai: true,
+    project: VERTEX_PROJECT,
+    location: VERTEX_LOCATION,
+  });
 }
 
 async function withTimeout<T>(promise: Promise<T>, label: string): Promise<T> {
@@ -120,6 +118,59 @@ function buildSystemInstruction(hiddenConcept: string) {
   ].join(" ");
 }
 
+function getErrorMessage(error: unknown) {
+  const fallback =
+    "Unable to complete the generation request due to an upstream model or infrastructure error.";
+
+  if (!(error instanceof Error)) {
+    return fallback;
+  }
+
+  try {
+    const parsed = JSON.parse(error.message) as {
+      error?: {
+        status?: string;
+        message?: string;
+        details?: Array<{
+          reason?: string;
+          metadata?: {
+            activationUrl?: string;
+            containerInfo?: string;
+          };
+        }>;
+      };
+    };
+
+    const apiError = parsed.error;
+    const detail = apiError?.details?.find(Boolean);
+
+    if (detail?.reason === "SERVICE_DISABLED") {
+      const activationUrl = detail.metadata?.activationUrl?.trim();
+      const project = detail.metadata?.containerInfo?.trim();
+
+      return [
+        `Vertex AI is disabled for project ${project ?? "the configured project"}.`,
+        "Enable `aiplatform.googleapis.com`, wait a few minutes for propagation, then retry.",
+        activationUrl ? `Activation URL: ${activationUrl}` : null,
+      ]
+        .filter(Boolean)
+        .join(" ");
+    }
+
+    if (apiError?.status === "NOT_FOUND") {
+      return `The configured Google model \`${TEXT_MODEL}\` is not available in Vertex region \`${VERTEX_LOCATION}\` for project \`${VERTEX_PROJECT}\`, or your project does not have access to it.`;
+    }
+
+    if (apiError?.message) {
+      return apiError.message;
+    }
+  } catch {
+    return error.message || fallback;
+  }
+
+  return error.message || fallback;
+}
+
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as GenerateRequestBody;
@@ -148,7 +199,7 @@ export async function POST(request: Request) {
             responseJsonSchema: puzzleSchema,
           },
         }),
-        "Text generation",
+        `Text generation (${TEXT_MODEL})`,
       );
 
       const parsed = JSON.parse(textResponse.text ?? "") as unknown;
@@ -163,8 +214,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error:
-            "Failed to generate the puzzle content. The text model did not return a usable payload.",
+          error: getErrorMessage(error),
         },
         { status: 502 },
       );
@@ -199,8 +249,7 @@ export async function POST(request: Request) {
 
       return NextResponse.json(
         {
-          error:
-            "Puzzle text was generated, but diagram generation failed. Retry the request.",
+          error: getErrorMessage(error),
           problem_text: puzzle.problem_text,
           correct_answer: puzzle.correct_answer,
         },
@@ -212,8 +261,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
-        error:
-          "Unable to process the generation request. Check the request payload and server configuration.",
+        error: getErrorMessage(error),
       },
       { status: 500 },
     );
