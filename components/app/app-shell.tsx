@@ -59,22 +59,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             ) : null}
             <Show when="signed-out">
               <div className="flex items-center gap-2">
-                <SignInButton mode="modal">
-                  <button
-                    type="button"
-                    className="border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070]"
-                  >
-                    SIGN IN
-                  </button>
-                </SignInButton>
-                <SignUpButton mode="modal">
-                  <button
-                    type="button"
-                    className="border border-[#3CD070] bg-[#3CD070] px-2 py-1 text-[10px] tracking-[0.22em] text-[#121614] transition-colors hover:bg-[#48db7c]"
-                  >
-                    SIGN UP
-                  </button>
-                </SignUpButton>
+              <Link
+                href="/sign-in"
+                className="border border-[#232B27] px-2 py-1 text-[10px] tracking-[0.22em] text-[#E0E6E3] transition-colors hover:border-[#3CD070] hover:text-[#3CD070]"
+              >
+                SIGN IN
+              </Link>
+              <Link
+                href="/sign-up"
+                className="border border-[#3CD070] bg-[#3CD070] px-2 py-1 text-[10px] tracking-[0.22em] text-[#0B0F0D] transition-colors hover:bg-[#35BD66]"
+              >
+                SIGN UP
+              </Link>
               </div>
             </Show>
             <Show when="signed-in">
