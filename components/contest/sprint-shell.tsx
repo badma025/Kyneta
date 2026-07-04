@@ -23,7 +23,7 @@ import {
 } from "@/lib/gcse-subjects";
 import { cn } from "@/lib/utils";
 
-const DURATION_MS = 90 * 1000;
+const DURATION_MS = 60 * 1000;
 const INITIAL_QUEUE_ID = "K-020";
 const SPRINT_REPORT_STORAGE_KEY = "kyneta-sprint-report";
 const INITIAL_RATING = 1500;

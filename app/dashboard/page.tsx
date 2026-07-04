@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 const SPRINT_REPORT_STORAGE_KEY = "kyneta-sprint-report";
 const DEFAULT_INITIAL_RATING = 1500;
-const DEFAULT_DURATION_MS = 90 * 1000;
+const DEFAULT_DURATION_MS = 60 * 1000;
 
 type SolvedConcept = {
   queueId: string;
