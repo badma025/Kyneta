@@ -17,6 +17,7 @@ import {
   hasProblemOrReservation,
   INITIAL_QUEUE_ORDINAL,
   releaseProblemReservation,
+  reserveProblemForQueueId,
   reserveNextProblem,
   storeProblem,
 } from "@/lib/problem-queue-store";
@@ -103,18 +104,6 @@ function getManagedQueueIds(sprintId: string) {
   return queueIds;
 }
 
-function countSequentialQueueCoverage(sprintId: string, startQueueId: string) {
-  let queueCoverage = 0;
-  let currentQueueId = startQueueId;
-
-  while (hasProblemOrReservation(sprintId, currentQueueId)) {
-    queueCoverage += 1;
-    currentQueueId = incrementQueueId(currentQueueId);
-  }
-
-  return queueCoverage;
-}
-
 function reserveProblemsToDepth(
   sprintId: string,
   subject: ReturnType<typeof normalizeGCSESubject>,
@@ -122,11 +111,18 @@ function reserveProblemsToDepth(
   startQueueId = formatQueueId(INITIAL_QUEUE_ORDINAL),
 ) {
   const reservations: ReservedProblem[] = [];
-  const existingCoverage = countSequentialQueueCoverage(sprintId, startQueueId);
-  const missingCount = Math.max(desiredDepth - existingCoverage, 0);
+  let currentQueueId = startQueueId;
+  let coveredCount = 0;
 
-  for (let index = 0; index < missingCount; index += 1) {
-    reservations.push(reserveNextProblem(sprintId, subject));
+  while (coveredCount < desiredDepth) {
+    if (!hasProblemOrReservation(sprintId, currentQueueId)) {
+      reservations.push(
+        reserveProblemForQueueId(sprintId, subject, currentQueueId),
+      );
+    }
+
+    coveredCount += 1;
+    currentQueueId = incrementQueueId(currentQueueId);
   }
 
   return reservations;
@@ -192,7 +188,7 @@ export async function POST(request: Request) {
     }
 
     if (!currentProblem) {
-      if (requestedQueueId && hasProblemOrReservation(sprintId, requestedQueueId)) {
+      if (requestedQueueId) {
         scheduleReservations(
           reserveProblemsToDepth(
             sprintId,

@@ -82,6 +82,19 @@ function getQueueOrdinal(queueId: string) {
   return Number.parseInt(match[1], 10);
 }
 
+function getNextHiddenConcept(sprintId: string, subject: GCSESubject) {
+  const state = getSprintState(sprintId);
+  const subjectConfig = getGCSESubjectConfig(subject);
+  const hiddenConcept =
+    subjectConfig.hiddenConcepts[
+      state.nextConceptIndex % subjectConfig.hiddenConcepts.length
+    ];
+
+  state.nextConceptIndex += 1;
+
+  return hiddenConcept;
+}
+
 function getProblemKey(sprintId: string, queueId: string) {
   return `${sprintId}:${queueId}`;
 }
@@ -104,22 +117,37 @@ export function reserveNextProblem(
   sprintId: string,
   subject: GCSESubject,
 ): ReservedProblem {
+  const queueId = formatQueueId(getSprintState(sprintId).nextOrdinal);
+
+  return reserveProblemForQueueId(sprintId, subject, queueId);
+}
+
+export function reserveProblemForQueueId(
+  sprintId: string,
+  subject: GCSESubject,
+  queueId: string,
+): ReservedProblem {
   const store = getStore();
   const state = getSprintState(sprintId);
-  const subjectConfig = getGCSESubjectConfig(subject);
+  const problemKey = getProblemKey(sprintId, queueId);
+
+  if (store.problems.has(problemKey) || store.inFlightQueueIds.has(problemKey)) {
+    throw new Error(`Queue ${queueId} is already stored or reserved for ${sprintId}.`);
+  }
+
+  const queueOrdinal = getQueueOrdinal(queueId);
   const reservation = {
     sprintId,
-    queueId: formatQueueId(state.nextOrdinal),
+    queueId,
     subject,
-    hiddenConcept:
-      subjectConfig.hiddenConcepts[
-        state.nextConceptIndex % subjectConfig.hiddenConcepts.length
-      ],
+    hiddenConcept: getNextHiddenConcept(sprintId, subject),
   };
 
-  state.nextOrdinal += 1;
-  state.nextConceptIndex += 1;
-  store.inFlightQueueIds.add(getProblemKey(sprintId, reservation.queueId));
+  if (Number.isFinite(queueOrdinal) && queueOrdinal >= state.nextOrdinal) {
+    state.nextOrdinal = queueOrdinal + 1;
+  }
+
+  store.inFlightQueueIds.add(problemKey);
 
   return reservation;
 }
