@@ -1,18 +1,13 @@
+import { ClerkProvider } from "@clerk/nextjs";
+import { shadcn } from "@clerk/ui/themes";
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Geist } from "next/font/google";
+import { Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { AppShell } from "@/components/app/app-shell";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  variable: "--font-jetbrains-mono",
+const geistMono = Geist_Mono({
+  variable: "--font-ui",
   subsets: ["latin"],
 });
 
@@ -29,10 +24,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={cn("h-full", inter.variable, jetbrainsMono.variable, "font-sans", geist.variable)}
+      className={cn("h-full font-sans", geistMono.variable)}
     >
       <body className="min-h-full">
-        <AppShell>{children}</AppShell>
+        <ClerkProvider appearance={{ theme: shadcn }}>
+          <AppShell>{children}</AppShell>
+        </ClerkProvider>
       </body>
     </html>
   );

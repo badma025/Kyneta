@@ -29,7 +29,7 @@ export function DemoComparison() {
         <div className="font-mono text-xs uppercase tracking-[0.24em] text-[#3CD070]">
           Kyneta
         </div>
-        <p className="max-w-xl font-mono text-sm leading-7 text-[#E0E6E3] sm:text-base">
+        <p className="max-w-xl text-sm leading-7 text-[#E0E6E3] sm:text-base">
           {kynetaPrompt}
         </p>
       </div>

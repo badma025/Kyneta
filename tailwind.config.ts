@@ -28,8 +28,26 @@ const config: Config = {
         xl: "0.125rem",
       },
       fontFamily: {
-        sans: ["var(--font-inter)", "sans-serif"],
-        mono: ["var(--font-jetbrains-mono)", "monospace"],
+        sans: [
+          "var(--font-ui)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          '"Liberation Mono"',
+          "monospace",
+        ],
+        mono: [
+          "var(--font-ui)",
+          "ui-monospace",
+          "SFMono-Regular",
+          "Menlo",
+          "Monaco",
+          "Consolas",
+          '"Liberation Mono"',
+          "monospace",
+        ],
       },
       keyframes: {
         pulseDot: {

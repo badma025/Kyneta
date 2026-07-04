@@ -1,11 +1,13 @@
 import Link from "next/link";
 
+import { ContestWarmup } from "@/components/home/contest-warmup";
 import { DemoComparison } from "@/components/home/demo-comparison";
 import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-4 py-24 sm:px-6 sm:py-32 lg:py-40">
+      <ContestWarmup />
       <section className="mx-auto flex w-full max-w-4xl flex-col items-center text-center">
         <div className="mb-6 font-mono text-xs uppercase tracking-[0.3em] text-[#7A8A82]">
           Cognitive Sprint Queue
