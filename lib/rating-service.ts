@@ -92,7 +92,7 @@ async function bootstrapUserRatings(
   displayName: string,
 ) {
   const supabase = getSupabaseAdminClient();
-  const { error } = await supabase.rpc("bootstrap_user_ratings", {
+  const { error } = await (supabase as any).rpc("bootstrap_user_ratings", {
     p_clerk_user_id: clerkUserId,
     p_display_name: displayName,
   });
@@ -149,7 +149,7 @@ export async function recordQuestionResult(
       score: input.isCorrect ? 1 : 0,
     },
   );
-  const { data, error } = await supabase.rpc("record_question_result", {
+  const { data, error } = await (supabase as any).rpc("record_question_result", {
     p_clerk_user_id: input.clerkUserId,
     p_display_name: input.displayName,
     p_subject: input.subject,
@@ -183,13 +183,13 @@ export async function recordQuestionResult(
 
 export async function getGlobalLeaderboard() {
   const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase.rpc("get_global_leaderboard");
+  const { data, error } = await (supabase as any).rpc("get_global_leaderboard");
 
   if (error) {
     throw new Error(`Failed to load global leaderboard: ${error.message}`);
   }
 
-  return (data ?? []).map((entry) => ({
+  return (data ?? []).map((entry: any) => ({
     ...entry,
     average_rating: Number(entry.average_rating),
     global_rank: Number(entry.global_rank),
@@ -198,7 +198,7 @@ export async function getGlobalLeaderboard() {
 
 export async function getSubjectLeaderboard(subject: GCSESubject) {
   const supabase = getSupabaseAdminClient();
-  const { data, error } = await supabase.rpc("get_subject_leaderboard", {
+  const { data, error } = await (supabase as any).rpc("get_subject_leaderboard", {
     p_subject: subject,
   });
 
@@ -208,7 +208,7 @@ export async function getSubjectLeaderboard(subject: GCSESubject) {
     );
   }
 
-  return (data ?? []).map((entry) => ({
+  return (data ?? []).map((entry: any) => ({
     ...entry,
     rating: Number(entry.rating),
     subject_rank: Number(entry.subject_rank),
